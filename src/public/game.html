@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+ <head>
+     <title>MEMOREMOJI</title>
+     <link rel="stylesheet" href="stylesheets/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+     <meta charset="utf-8" /> 
+ </head>
+ <body>
+     <script src="javascripts/main.js"></script>
+     <!-- ok to add additional script tags, but do not modify the html below -->
+     <h1 class="title">Ⓜ️EM😂REM🤢Jℹ️</h1>
+     <div class="start">
+         <div>
+             <h2>Number of Cards</h2>
+             <input id="total-cards" type="number" />
+         </div>
+         <div>
+             <h2>Max Turns</h2>
+             <input id="max-turns" type="number" />
+         </div>            
+         <div>
+             <h2>Set Cards </h2>
+             <h3>(testing mode; enter each card value separated by comma)</h3>
+             <input id="card-faces" type="text" />
+         </div>
+         <div>
+             <button class="play-btn" type="button">Game Start</button>
+         </div>
+     </div>
+     <div class="game"></div>
+     <div class="result"></div>
+     <div class="reset">
+         <button class="reset-btn" type="button">Reset</button>
+     </div>
+     <div class="error-message">
+         Please re-enter the number of cards (must be even number) and max turns !
+         <button class="error-btn" type="button">Go Back</button>
+     </div>
+ </body>
+</html>
