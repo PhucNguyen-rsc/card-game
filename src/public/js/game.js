@@ -70,10 +70,6 @@ function gameValidation(){
     }
 }
 
-function checkMatch(){
-
-}
-
 function gameBoard(cards, max_turns){
     let turn = 0
     let match = false;
