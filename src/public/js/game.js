@@ -41,7 +41,7 @@ function gameValidation(){
     }
     if (card_faces !== ''){ //present
         card_faces_list = card_faces.split(",");
-        if (card_faces_list.length !== total_cards){
+        if (card_faces_list.length !== total_cards * 2){
             showError = true;
         }
 
@@ -103,7 +103,6 @@ function gameBoard(cards, max_turns){
         if (!match){
             Object.keys(keep_track).forEach(key => {
                 let flipCard = gameElement.children[parseInt(key, "10")];
-                console.log("flipcard: ", flipCard);
                 flipCard.textContent = '';
             });
         }
@@ -150,7 +149,7 @@ function gameBoard(cards, max_turns){
                         keep_track[this.getAttribute('orderID')] = this.getAttribute('secretText');
                     } 
                     else { //up to down
-                        delete keep_track[this.orderID]
+                        delete keep_track[this.getAttribute('orderID')];
                         this.textContent = '';
                     }
                 
@@ -236,10 +235,24 @@ function startGame(max_turns, cards){
 }
 
 function endingPage(winning){
+    const header = document.querySelector(".title");
+    const resultShow = document.createElement("div");
+
     if (winning){
-        console.log("WINNING");
+        resultShow.textContent = "YOU WIN:";
     }
     else{
-        console.log("LOSING");
+        resultShow.textContent = "YOU LOST:";
     }
+
+    document.body.insertBefore(resultShow, header.nextSibling);
+        
+    const quitBtn= document.querySelector(".quit-button");
+    const okayBtn = document.querySelector(".okay-button");
+
+    okayBtn.classList.add('hidden');
+    gameElement.innerHTML = '';
+    gameElement.classList.add("hidden");
+    quitBtn.classList.add('hidden');
+    resetElement.classList.remove("hidden");
 }
