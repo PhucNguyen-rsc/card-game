@@ -10,6 +10,25 @@ errorMessageElement.classList.add("hidden");
 
 const gameStartButn = document.querySelector('.play-btn');
 
+let scoreStored = localStorage.getItem("scores"); // {'turn: max turn'}
+let scores = {}
+let scorePrevShow = document.createElement("div");
+scorePrevShow.className = "prev-score-show"
+scorePrevShow.innerHTML = "<p>Previous Score:<p>"
+scorePrevShow.innerHTML += "<p>Turn / Max Turn<p>"
+
+if (scoreStored !== null) {
+    scores = JSON.parse(scoreStored);
+    if (Object.keys(scores).length > 0) {
+        for (const [turn, maxTurn] of Object.entries(scores)) {
+            scorePrevShow.innerHTML += `<li>${turn} / ${maxTurn}</li>`
+        }
+    }
+}
+
+let startPg = document.body.querySelector(".start");
+startPg.appendChild(scorePrevShow);
+
 function checkSymbols(arr) {
     const count = {};
     for (const element of arr) {
@@ -73,16 +92,13 @@ gameStartButn.addEventListener('click', gameValidation);
 
 function endingPage(winning){
     const header = document.querySelector(".title");
-    const resultShow = document.createElement("div");
 
     if (winning){
-        resultShow.textContent = "YOU WIN:";
+        resultElement.textContent = "YOU WIN:";
     }
     else{
-        resultShow.textContent = "YOU LOST:";
+        resultElement.textContent = "YOU LOST:";
     }
-
-    document.body.insertBefore(resultShow, header.nextSibling);
         
     const quitBtn= document.querySelector(".quit-button");
     const okayBtn = document.querySelector(".okay-button");
@@ -92,6 +108,8 @@ function endingPage(winning){
     gameElement.classList.add("hidden");
     quitBtn.classList.add('hidden');
     resetElement.classList.remove("hidden");
+    resultElement.classList.remove('hidden');
+    resetElement.style.margin = "10px";
 }
 
 function updateTurn(turn, maxTurns){
@@ -122,9 +140,11 @@ function checkMatch(keepTrack, matchedCard){
 }
 
 function checkGameEnd(matchedCard, cards, turn, maxTurns) {
-    console.log("Match card: ", matchedCard);
-    if (matchedCard.length === cards.length) {
-        endingPage(true); // render winning page
+    if (matchedCard.length === cards.length) { // winning        
+        scores[turn] = maxTurns;
+        localStorage.setItem("scores", JSON.stringify(scores));
+
+        endingPage(true); 
     } else if (turn >= maxTurns) {
         endingPage(false); // render losing page
     }
@@ -252,5 +272,4 @@ function startGame(maxTurns, cards){
     });
 
     gameBoard(cards, maxTurns);
-
 }
