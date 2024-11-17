@@ -2,7 +2,6 @@ body {
 	height: 100vh;
 	font-family: Garamond, sans-serif;
 	font-size: 1.25em;
-	background-color: #222;
 	text-align: center;
 	margin: auto;
 	margin-top: 0px;
@@ -82,4 +81,38 @@ form textarea, form input {
 input {
 	border: 1px solid #555;
 	font-size: 1em;
+}
+
+.card {
+    width: 75px;
+    height: 75px;
+    background-color: #ffffff;
+	border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    /* Flexbox for centering content */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    color: #333333;
+    text-align: center;
+
+    user-select: none;
+}
+
+.turn-counter{
+	margin: 20px;
+}
+
+.hidden {
+	display: none;
+}
+
+.game {
+	justify-content: center;
+	align-items: center;
 }
