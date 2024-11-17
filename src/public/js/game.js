@@ -10,23 +10,23 @@ errorMessageElement.classList.add("hidden");
 
 const gameStartButn = document.querySelector('.play-btn');
 
-let scoreStored = localStorage.getItem("scores"); // {'turn: max turn'}
-let scores = {}
-let scorePrevShow = document.createElement("div");
-scorePrevShow.className = "prev-score-show"
-scorePrevShow.innerHTML = "<p>Previous Score:<p>"
-scorePrevShow.innerHTML += "<p>Turn / Max Turn<p>"
+const scoreStored = localStorage.getItem("scores"); // {'turn: max turn'}
+let scores = {};
+const scorePrevShow = document.createElement("div");
+scorePrevShow.className = "prev-score-show";
+scorePrevShow.innerHTML = "<p>Previous Score:<p>";
+scorePrevShow.innerHTML += "<p>Turn / Max Turn<p>";
 
 if (scoreStored !== null) {
     scores = JSON.parse(scoreStored);
     if (Object.keys(scores).length > 0) {
         for (const [turn, maxTurn] of Object.entries(scores)) {
-            scorePrevShow.innerHTML += `<li>${turn} / ${maxTurn}</li>`
+            scorePrevShow.innerHTML += `<li>${turn} / ${maxTurn}</li>`;
         }
     }
 }
 
-let startPg = document.body.querySelector(".start");
+const startPg = document.body.querySelector(".start");
 startPg.appendChild(scorePrevShow);
 
 function checkSymbols(arr) {
@@ -91,8 +91,6 @@ function gameValidation(){
 gameStartButn.addEventListener('click', gameValidation);
 
 function endingPage(winning){
-    const header = document.querySelector(".title");
-
     if (winning){
         resultElement.textContent = "YOU WIN:";
     }
