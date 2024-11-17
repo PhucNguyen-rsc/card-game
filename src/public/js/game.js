@@ -77,18 +77,22 @@ function checkMatch(){
 function gameBoard(cards, max_turns){
     let turn = 0
     let match = false;
+    let clickOkBtn = true;
     let keep_track = {}; // index : value
     let matchedCard = [];
 
     const matchResult = document.createElement('div') //display message
+    matchResult.className = 'match-result'
     matchResult.style.margin = "10px";
 
     const quitBtn = document.querySelector('.quit-button')
 
     const okayBtn = document.createElement('button') //okay button to keep going on
+    okayBtn.className = 'okay-button'
     okayBtn.textContent = "OK";
     okayBtn.style.margin = "10px";
     okayBtn.addEventListener('click', function(){
+        clickOkBtn = true;
         if (!matchResult.classList.contains('hidden')) {
             matchResult.classList.add('hidden');
         }
@@ -139,9 +143,8 @@ function gameBoard(cards, max_turns){
         card.textContent = ``;
 
         card.addEventListener('click', function (){
-            console.log("KEEP TRACK: ", keep_track);
-            if (!matchedCard.includes(this.getAttribute('orderID'))) { // if matched already -->freeze
-                if ( Object.keys(keep_track).length < 2){
+            if (clickOkBtn){
+                if (!matchedCard.includes(this.getAttribute('orderID'))) { // if matched already -->freeze
                     if (this.textContent !== this.getAttribute('secretText')) { //down to up
                         this.textContent = this.getAttribute('secretText');
                         keep_track[this.getAttribute('orderID')] = this.getAttribute('secretText');
@@ -150,36 +153,46 @@ function gameBoard(cards, max_turns){
                         delete keep_track[this.orderID]
                         this.textContent = '';
                     }
-                }
-        
-                else{ //if more --> freeze
-                    turn +=1;               
-                    updateTurn(turn, max_turns);
-
-                    const keep_track_values =  Object.values(keep_track);
-                    const keep_track_idx = Object.keys(keep_track);
-                    const allSame = keep_track_values.every(value => value === keep_track_values[0]);
-                    if (allSame){
-                        matchedCard = [...matchedCard, ...keep_track_idx];
-                        match = true;
+                
+                    if (Object.keys(keep_track).length === 2){
+                        turn +=1;               
+                        clickOkBtn = false;
+                        [matchedCard, match] = checkMatch(keep_track, matchedCard);
+                        checkGameEnd(matchedCard, cards, turn, max_turns);
+                        updateTurn(turn, max_turns);
                     }
-                    else{ // oops not this match
-                        matchResult.innerHTML = "<p>No Match! Press Okay!</p>";
-                        matchResult.classList.remove('hidden');
-                    }
-                    okayBtn.classList.remove('hidden');
                 }
             }
-            checkGameEnd(matchedCard, cards, turn, max_turns);
         });
-
         gameElement.appendChild(card);
     }
 
     gameElement.classList.remove('hidden');
 }
 
+function checkMatch(keep_track, matchedCard){
+    const okayBtn = document.querySelector('.okay-button');
+    const matchResult = document.querySelector('.match-result');
+
+    const keep_track_values =  Object.values(keep_track);
+    const keep_track_idx = Object.keys(keep_track);
+    const allSame = keep_track_values.every(value => value === keep_track_values[0]);
+
+    if (allSame){ 
+        matchedCard = [...matchedCard, ...keep_track_idx];
+    }
+    else{ // oops not this match
+        matchResult.innerHTML = "<p>No Match! Press Okay!</p>";
+        matchResult.classList.remove('hidden');
+    }
+
+    okayBtn.classList.remove('hidden');
+
+    return [matchedCard, allSame];
+}
+
 function checkGameEnd(matchedCard, cards, turn, max_turns) {
+    console.log("Match card: ", matchedCard);
     if (matchedCard.length === cards.length) {
         endingPage(true); // render winning page
     } else if (turn >= max_turns) {
@@ -212,7 +225,9 @@ function startGame(max_turns, cards){
 
     quitBtn.addEventListener('click', function() {
         startPage.classList.remove('hidden'); //show inital page
+        gameElement.innerHTML = '';
         gameElement.classList.add("hidden");
+        quitBtn.classList.add('hidden');
         turnCount.classList.add('hidden');
     });
 
