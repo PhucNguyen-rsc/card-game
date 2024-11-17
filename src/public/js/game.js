@@ -9,7 +9,6 @@ const errorMessageElement = document.querySelector('.error-message');
 errorMessageElement.classList.add("hidden");
 
 const gameStartButn = document.querySelector('.play-btn');
-gameStartButn.addEventListener('click', gameValidation);
 
 function checkSymbols(arr) {
     const count = {};
@@ -27,37 +26,37 @@ function checkSymbols(arr) {
 
 function gameValidation(){
     let showError = false;
-    let card_faces_list = []
+    let cardFacesList = [];
 
-    const total_cards = document.getElementById('total-cards').value;
-    const max_turns = document.getElementById('max-turns').value;
-    const card_faces = document.getElementById('card-faces').value;
+    const totalCards = document.getElementById('total-cards').value;
+    const maxTurns = document.getElementById('max-turns').value;
+    const cardFaces = document.getElementById('card-faces').value;
 
-    if (total_cards < 2 || total_cards % 2 !== 0 || total_cards > 36){
+    if (totalCards < 2 || totalCards % 2 !== 0 || totalCards > 36){
         showError = true;
     }
-    if (max_turns < total_cards/2){
+    if (maxTurns < totalCards/2){
         showError = true;
     }
-    if (card_faces !== ''){ //present
-        card_faces_list = card_faces.split(",");
-        if (card_faces_list.length !== total_cards * 2){
+    if (cardFaces !== ''){ //present
+        cardFacesList = cardFaces.split(",");
+        if (cardFacesList.length !== totalCards * 2){
             showError = true;
         }
 
-        else if (!checkSymbols(card_faces_list)){
+        else if (!checkSymbols(cardFacesList)){
             showError = true;
         }
     }
     else { // create and shuffle array
-        for (let i = 1; i <= total_cards; i++){
-            card_faces_list.push(i);
-            card_faces_list.push(i);
+        for (let i = 1; i <= totalCards; i++){
+            cardFacesList.push(i);
+            cardFacesList.push(i);
         }
 
-        for (let i = card_faces_list.length - 1; i > 0; i--) {
+        for (let i = cardFacesList.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [card_faces_list[i], card_faces_list[j]] = [card_faces_list[j], card_faces_list[i]];
+            [cardFacesList[i], cardFacesList[j]] = [cardFacesList[j], cardFacesList[i]];
         }
     }
 
@@ -66,25 +65,86 @@ function gameValidation(){
     }
     else{
         errorMessageElement.classList.add("hidden");
-        startGame(max_turns, card_faces_list)
+        startGame(maxTurns, cardFacesList);
     }
 }
 
-function gameBoard(cards, max_turns){
-    let turn = 0
+gameStartButn.addEventListener('click', gameValidation);
+
+function endingPage(winning){
+    const header = document.querySelector(".title");
+    const resultShow = document.createElement("div");
+
+    if (winning){
+        resultShow.textContent = "YOU WIN:";
+    }
+    else{
+        resultShow.textContent = "YOU LOST:";
+    }
+
+    document.body.insertBefore(resultShow, header.nextSibling);
+        
+    const quitBtn= document.querySelector(".quit-button");
+    const okayBtn = document.querySelector(".okay-button");
+
+    okayBtn.classList.add('hidden');
+    gameElement.innerHTML = '';
+    gameElement.classList.add("hidden");
+    quitBtn.classList.add('hidden');
+    resetElement.classList.remove("hidden");
+}
+
+function updateTurn(turn, maxTurns){
+    const count = document.querySelector('.turn-counter');
+    count.innerHTML = `TURN ${turn}/${maxTurns}`;
+}
+
+
+function checkMatch(keepTrack, matchedCard){
+    const okayBtn = document.querySelector('.okay-button');
+    const matchResult = document.querySelector('.match-result');
+
+    const keepTrackValues = Object.values(keepTrack);
+    const keepTrackIdx = Object.keys(keepTrack);
+    const allSame = keepTrackValues.every(value => value === keepTrackValues[0]);
+
+    if (allSame){ 
+        matchedCard = [...matchedCard, ...keepTrackIdx];
+    }
+    else{ // oops not this match
+        matchResult.innerHTML = "<p>No Match! Press Okay!</p>";
+        matchResult.classList.remove('hidden');
+    }
+
+    okayBtn.classList.remove('hidden');
+
+    return [matchedCard, allSame];
+}
+
+function checkGameEnd(matchedCard, cards, turn, maxTurns) {
+    console.log("Match card: ", matchedCard);
+    if (matchedCard.length === cards.length) {
+        endingPage(true); // render winning page
+    } else if (turn >= maxTurns) {
+        endingPage(false); // render losing page
+    }
+}
+
+function gameBoard(cards, maxTurns){
+    let turn = 0;
     let match = false;
     let clickOkBtn = true;
-    let keep_track = {}; // index : value
+    let keepTrack = {}; // index : value
     let matchedCard = [];
 
-    const matchResult = document.createElement('div') //display message
-    matchResult.className = 'match-result'
+    const matchResult = document.createElement('div'); //display message
+    matchResult.className = 'match-result';
     matchResult.style.margin = "10px";
 
-    const quitBtn = document.querySelector('.quit-button')
+    const quitBtn = document.querySelector('.quit-button');
 
-    const okayBtn = document.createElement('button') //okay button to keep going on
-    okayBtn.className = 'okay-button'
+    const okayBtn = document.createElement('button'); //okay button to keep going on
+    okayBtn.className = 'okay-button';
     okayBtn.textContent = "OK";
     okayBtn.style.margin = "10px";
     okayBtn.addEventListener('click', function(){
@@ -97,13 +157,13 @@ function gameBoard(cards, max_turns){
 
         //flipping the cards down
         if (!match){
-            Object.keys(keep_track).forEach(key => {
-                let flipCard = gameElement.children[parseInt(key, "10")];
+            Object.keys(keepTrack).forEach(key => {
+                const flipCard = gameElement.children[parseInt(key, "10")];
                 flipCard.textContent = '';
             });
         }
-        keep_track = {};
-        match = false
+        keepTrack = {};
+        match = false;
     });
 
     document.body.insertBefore(matchResult, quitBtn);
@@ -142,19 +202,19 @@ function gameBoard(cards, max_turns){
                 if (!matchedCard.includes(this.getAttribute('orderID'))) { // if matched already -->freeze
                     if (this.textContent !== this.getAttribute('secretText')) { //down to up
                         this.textContent = this.getAttribute('secretText');
-                        keep_track[this.getAttribute('orderID')] = this.getAttribute('secretText');
+                        keepTrack[this.getAttribute('orderID')] = this.getAttribute('secretText');
                     } 
                     else { //up to down
-                        delete keep_track[this.getAttribute('orderID')];
+                        delete keepTrack[this.getAttribute('orderID')];
                         this.textContent = '';
                     }
                 
-                    if (Object.keys(keep_track).length === 2){
+                    if (Object.keys(keepTrack).length === 2){
                         turn +=1;               
                         clickOkBtn = false;
-                        [matchedCard, match] = checkMatch(keep_track, matchedCard);
-                        checkGameEnd(matchedCard, cards, turn, max_turns);
-                        updateTurn(turn, max_turns);
+                        [matchedCard, match] = checkMatch(keepTrack, matchedCard);
+                        checkGameEnd(matchedCard, cards, turn, maxTurns);
+                        updateTurn(turn, maxTurns);
                     }
                 }
             }
@@ -165,42 +225,7 @@ function gameBoard(cards, max_turns){
     gameElement.classList.remove('hidden');
 }
 
-function checkMatch(keep_track, matchedCard){
-    const okayBtn = document.querySelector('.okay-button');
-    const matchResult = document.querySelector('.match-result');
-
-    const keep_track_values =  Object.values(keep_track);
-    const keep_track_idx = Object.keys(keep_track);
-    const allSame = keep_track_values.every(value => value === keep_track_values[0]);
-
-    if (allSame){ 
-        matchedCard = [...matchedCard, ...keep_track_idx];
-    }
-    else{ // oops not this match
-        matchResult.innerHTML = "<p>No Match! Press Okay!</p>";
-        matchResult.classList.remove('hidden');
-    }
-
-    okayBtn.classList.remove('hidden');
-
-    return [matchedCard, allSame];
-}
-
-function checkGameEnd(matchedCard, cards, turn, max_turns) {
-    console.log("Match card: ", matchedCard);
-    if (matchedCard.length === cards.length) {
-        endingPage(true); // render winning page
-    } else if (turn >= max_turns) {
-        endingPage(false); // render losing page
-    }
-}
-
-function updateTurn(turn, max_turns){
-    const count = document.querySelector('.turn-counter');
-    count.innerHTML = `TURN ${turn}/${max_turns}`;
-}
-
-function startGame(max_turns, cards){
+function startGame(maxTurns, cards){
     const startPage = document.querySelector('.start');
     startPage.classList.add("hidden");
 
@@ -208,13 +233,13 @@ function startGame(max_turns, cards){
 
     const turnCount = document.createElement('div');
     turnCount.className = "turn-counter";
-    turnCount.innerHTML = `TURN 0/${max_turns}`;
+    turnCount.innerHTML = `TURN 0/${maxTurns}`;
 
     const referenceElement = document.body.children[3];
     document.body.insertBefore(turnCount, referenceElement);
 
     quitBtn.className = 'quit-button';
-    quitBtn.style.margin = '20px'
+    quitBtn.style.margin = '20px';
     quitBtn.textContent = 'Quit';
     document.body.appendChild(quitBtn);
 
@@ -226,29 +251,6 @@ function startGame(max_turns, cards){
         turnCount.classList.add('hidden');
     });
 
-    gameBoard(cards, max_turns);
+    gameBoard(cards, maxTurns);
 
-}
-
-function endingPage(winning){
-    const header = document.querySelector(".title");
-    const resultShow = document.createElement("div");
-
-    if (winning){
-        resultShow.textContent = "YOU WIN:";
-    }
-    else{
-        resultShow.textContent = "YOU LOST:";
-    }
-
-    document.body.insertBefore(resultShow, header.nextSibling);
-        
-    const quitBtn= document.querySelector(".quit-button");
-    const okayBtn = document.querySelector(".okay-button");
-
-    okayBtn.classList.add('hidden');
-    gameElement.innerHTML = '';
-    gameElement.classList.add("hidden");
-    quitBtn.classList.add('hidden');
-    resetElement.classList.remove("hidden");
 }
